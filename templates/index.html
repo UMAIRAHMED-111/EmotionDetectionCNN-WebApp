@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emotion Detection</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+        }
+
+        #videoContainer {
+            display: none;
+        }
+
+        button {
+            padding: 10px 20px;
+            margin: 10px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Emotion Detection</h1>
+    <div id="videoContainer">
+        <img id="videoFeed" src="{{ url_for('video_feed') }}" alt="Webcam Feed">
+    </div>
+    <button id="startBtn">Start Video</button>
+    <button id="stopBtn">Stop Video</button>
+
+    <script>
+        const videoContainer = document.getElementById('videoContainer');
+        const videoFeed = document.getElementById('videoFeed');
+        const startBtn = document.getElementById('startBtn');
+        const stopBtn = document.getElementById('stopBtn');
+
+        startBtn.addEventListener('click', function() {
+            videoContainer.style.display = 'block';
+            videoFeed.src = "{{ url_for('video_feed') }}";
+        });
+
+        stopBtn.addEventListener('click', function() {
+            videoContainer.style.display = 'none';
+            videoFeed.src = "";  // Stop the video feed by removing the src
+        });
+    </script>
+</body>
+</html>
