@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -7,35 +8,110 @@
     <title>Emotion Detection</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             text-align: center;
-            margin-top: 50px;
+            margin: 0;
+            background-color: #f4f4f4;
+            color: #333;
         }
+
+        header {
+            background-color: #333;
+            color: #fff;
+            padding: 1rem;
+            text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        #content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem;
+        }
+
+        video, canvas {
+            margin-bottom: 1rem;
+            max-width: 100%;
+            border-radius: 8px;
+            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
         button {
             padding: 10px 20px;
-            margin: 10px;
+            margin-top: 1rem;
             cursor: pointer;
             border: none;
             border-radius: 5px;
             background-color: #007BFF;
             color: white;
             font-size: 1rem;
+            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.3s;
         }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
         button:disabled {
             background-color: #cccccc;
         }
+
         #emotion {
             font-size: 1.5rem;
-            margin-top: 20px;
+            margin-top: 1rem;
+            font-weight: bold;
+        }
+
+        #emotionCount {
+            margin-top: 2rem;
+            text-align: center;
+            background-color: #fff;
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        ul li {
+            font-size: 1.2rem;
+            margin: 0.5rem 0;
+        }
+
+        @media screen and (max-width: 768px) {
+            #content {
+                padding: 1rem;
+            }
         }
     </style>
 </head>
+
 <body>
-    <h1>Emotion Detection</h1>
-    <video id="video" width="640" height="480" autoplay></video>
-    <canvas id="canvas" width="640" height="480" style="display: none;"></canvas>
-    <button id="startStopBtn">Start Video</button>
-    <p id="emotion">Emotion: <span></span></p>
+    <header>
+        <h1>Emotion Detection</h1>
+    </header>
+    <div id="content">
+        <video id="video" width="640" height="480" autoplay></video>
+        <canvas id="canvas" width="640" height="480" style="display: none;"></canvas>
+        <button id="startStopBtn">Start Video</button>
+        <p id="emotion">Emotion: <span></span></p>
+        <div id="emotionCount">
+            <h3>Emotion Counts:</h3>
+            <ul>
+                <li>Neutral: <span id="neutralCount">0</span></li>
+                <li>Happiness: <span id="happinessCount">0</span></li>
+                <li>Surprise: <span id="surpriseCount">0</span></li>
+                <li>Sadness: <span id="sadnessCount">0</span></li>
+                <li>Anger: <span id="angerCount">0</span></li>
+                <li>Disgust: <span id="disgustCount">0</span></li>
+                <li>Fear: <span id="fearCount">0</span></li>
+            </ul>
+        </div>
+    </div>
 
     <script>
         const video = document.getElementById('video');
@@ -70,6 +146,14 @@
                 .then(response => response.json())
                 .then(data => {
                     emotionText.textContent = data.emotion;
+                    const emotionCounts = data.emotion_count;
+                    document.getElementById("neutralCount").textContent = emotionCounts.neutral;
+                    document.getElementById("happinessCount").textContent = emotionCounts.happiness;
+                    document.getElementById("surpriseCount").textContent = emotionCounts.surprise;
+                    document.getElementById("sadnessCount").textContent = emotionCounts.sadness;
+                    document.getElementById("angerCount").textContent = emotionCounts.anger;
+                    document.getElementById("disgustCount").textContent = emotionCounts.disgust;
+                    document.getElementById("fearCount").textContent = emotionCounts.fear;
                 })
                 .catch(error => console.error('Error processing the frame.', error));
             }, 500);
