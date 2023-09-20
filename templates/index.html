@@ -11,40 +11,87 @@
             text-align: center;
             margin-top: 50px;
         }
-
-        #videoContainer {
-            display: none;
-        }
-
         button {
             padding: 10px 20px;
             margin: 10px;
-            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background-color: #007BFF;
+            color: white;
+            font-size: 1rem;
+        }
+        button:disabled {
+            background-color: #cccccc;
+        }
+        #emotion {
+            font-size: 1.5rem;
+            margin-top: 20px;
         }
     </style>
 </head>
 <body>
     <h1>Emotion Detection</h1>
-    <div id="videoContainer">
-        <img id="videoFeed" src="{{ url_for('video_feed') }}" alt="Webcam Feed">
-    </div>
-    <button id="startBtn">Start Video</button>
-    <button id="stopBtn">Stop Video</button>
+    <video id="video" width="640" height="480" autoplay></video>
+    <canvas id="canvas" width="640" height="480" style="display: none;"></canvas>
+    <button id="startStopBtn">Start Video</button>
+    <p id="emotion">Emotion: <span></span></p>
 
     <script>
-        const videoContainer = document.getElementById('videoContainer');
-        const videoFeed = document.getElementById('videoFeed');
-        const startBtn = document.getElementById('startBtn');
-        const stopBtn = document.getElementById('stopBtn');
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const emotionText = document.querySelector('#emotion span');
+        const startStopBtn = document.getElementById('startStopBtn');
+        
+        let isStreaming = false;
+        let intervalId;
 
-        startBtn.addEventListener('click', function() {
-            videoContainer.style.display = 'block';
-            videoFeed.src = "{{ url_for('video_feed') }}";
-        });
+        function startVideo() {
+            navigator.mediaDevices.getUserMedia({ video: true })
+                .then(stream => {
+                    video.srcObject = stream;
+                    video.play();
+                    isStreaming = true;
+                    startStopBtn.innerText = "Stop Video";
+                })
+                .catch(error => console.error('Error accessing the webcam.', error));
+            
+            intervalId = setInterval(() => {
+                const context = canvas.getContext('2d');
+                context.drawImage(video, 0, 0, 640, 480);
+                const dataURL = canvas.toDataURL('image/jpeg');
+                fetch('/process_frame', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ image: dataURL })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    emotionText.textContent = data.emotion;
+                })
+                .catch(error => console.error('Error processing the frame.', error));
+            }, 500);
+        }
 
-        stopBtn.addEventListener('click', function() {
-            videoContainer.style.display = 'none';
-            videoFeed.src = "";  // Stop the video feed by removing the src
+        function stopVideo() {
+            if (video.srcObject) {
+                const tracks = video.srcObject.getTracks();
+                tracks.forEach(track => track.stop());
+                video.srcObject = null;
+            }
+            isStreaming = false;
+            clearInterval(intervalId);
+            startStopBtn.innerText = "Start Video";
+        }
+
+        startStopBtn.addEventListener('click', () => {
+            if(isStreaming) {
+                stopVideo();
+            } else {
+                startVideo();
+            }
         });
     </script>
 </body>
