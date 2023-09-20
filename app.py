@@ -22,6 +22,8 @@ print("Loaded model from disk")
 # Define emotion labels for mapping predictions
 emotion_labels = ['neutral', 'happiness', 'surprise', 'sadness', 'anger', 'disgust', 'fear']
 
+emotion_count = {label: 0 for label in emotion_labels}
+
 # Load the Haar Cascade for face detection
 face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
 
@@ -55,9 +57,10 @@ def process_frame():
     for (x, y, w, h) in faces:
         face_roi = gray[y:y+h, x:x+w]
         emotion = predict_emotion(face_roi)
+        emotion_count[emotion] += 1
         break  # assuming only one face; adjust if needed
 
-    return jsonify({"emotion": emotion})
+    return jsonify({"emotion": emotion, "emotion_count": emotion_count})
 
 def gen():
     """Generate frame for video streaming."""
