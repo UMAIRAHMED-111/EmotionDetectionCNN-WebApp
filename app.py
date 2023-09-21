@@ -5,6 +5,7 @@ from keras.models import model_from_json
 import os
 import base64
 import io
+from datetime import datetime
 
 app = Flask(__name__)
 
@@ -21,6 +22,7 @@ print("Loaded model from disk")
 
 # Define emotion labels for mapping predictions
 emotion_labels = ['neutral', 'happiness', 'surprise', 'sadness', 'anger', 'disgust', 'fear']
+saved_frames = []
 
 emotion_count = {label: 0 for label in emotion_labels}
 
@@ -59,8 +61,13 @@ def process_frame():
         emotion = predict_emotion(face_roi)
         emotion_count[emotion] += 1
         break  # assuming only one face; adjust if needed
+    
+    # Store the image, prediction, and timestamp
+    timestamp = str(datetime.now().time())  # Current time
+    if data.get('store', False):  # Only store if the 'store' flag is true
+        saved_frames.append({"timestamp": data['timestamp'], "image": encoded_image, "prediction": emotion})
 
-    return jsonify({"emotion": emotion, "emotion_count": emotion_count})
+    return jsonify({"emotion": emotion, "emotion_count": emotion_count, "timestamp": timestamp})
 
 def gen():
     """Generate frame for video streaming."""
@@ -83,6 +90,15 @@ def gen():
 @app.route('/video_feed')
 def video_feed():
     return Response(gen(), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+@app.route('/report')
+def report():
+    global saved_frames
+    report_frames = saved_frames.copy()  # Temporary store the frames for the report
+    saved_frames.clear()  # Clear the saved frames
+    return render_template('report.html', frames=report_frames)
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)
