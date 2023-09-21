@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Report</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f7f8fc;
+            color: #333;
+        }
+
+        h1 {
+            background-color: #2C3E50;
+            color: #ecf0f1;
+            text-align: center;
+            padding: 20px;
+            margin-bottom: 40px;
+        }
+
+        .frame-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .frame {
+            background-color: #ecf0f1;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+            flex-basis: 100%; /* Taking full width on mobile */
+        }
+
+        @media (min-width: 600px) {
+            /* On larger screens, each frame takes half of the container's width */
+            .frame {
+                flex-basis: calc(50% - 10px); /* 10px for some spacing between */
+            }
+        }
+
+        img {
+            max-width: 100%;
+            border-radius: 8px;
+        }
+
+        p {
+            margin: 10px 0;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Emotion Detection Report</h1>
+    <div class="frame-container">
+        {% for frame in frames %}
+        <div class="frame">
+            <p>Timestamp: {{ frame.timestamp }}</p>
+            <img src="data:image/jpeg;base64,{{ frame.image }}" alt="Emotion Image">
+            <p>Predicted Emotion: {{ frame.prediction }}</p>
+        </div>
+        {% endfor %}
+    </div>
+</body>
+
+</html>
