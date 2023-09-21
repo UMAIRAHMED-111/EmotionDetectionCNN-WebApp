@@ -98,19 +98,8 @@
         <video id="video" width="640" height="480" autoplay></video>
         <canvas id="canvas" width="640" height="480" style="display: none;"></canvas>
         <button id="startStopBtn">Start Video</button>
+        <button id="viewReportBtn">View Report</button>
         <p id="emotion">Emotion: <span></span></p>
-        <div id="emotionCount">
-            <h3>Emotion Counts:</h3>
-            <ul>
-                <li>Neutral: <span id="neutralCount">0</span></li>
-                <li>Happiness: <span id="happinessCount">0</span></li>
-                <li>Surprise: <span id="surpriseCount">0</span></li>
-                <li>Sadness: <span id="sadnessCount">0</span></li>
-                <li>Anger: <span id="angerCount">0</span></li>
-                <li>Disgust: <span id="disgustCount">0</span></li>
-                <li>Fear: <span id="fearCount">0</span></li>
-            </ul>
-        </div>
     </div>
 
     <script>
@@ -121,43 +110,46 @@
         
         let isStreaming = false;
         let intervalId;
+        let frame_count = 0; // Added frame_count variable
 
         function startVideo() {
-            navigator.mediaDevices.getUserMedia({ video: true })
-                .then(stream => {
-                    video.srcObject = stream;
-                    video.play();
-                    isStreaming = true;
-                    startStopBtn.innerText = "Stop Video";
-                })
-                .catch(error => console.error('Error accessing the webcam.', error));
+    navigator.mediaDevices.getUserMedia({ video: true })
+        .then(stream => {
+            video.srcObject = stream;
+            video.play();
+            isStreaming = true;
+            startStopBtn.innerText = "Stop Video";
+        })
+        .catch(error => console.error('Error accessing the webcam.', error));
+    
+    intervalId = setInterval(() => {
+        const context = canvas.getContext('2d');
+        context.drawImage(video, 0, 0, 640, 480);
+        const dataURL = canvas.toDataURL('image/jpeg');
+        
+        frame_count += 5; // Increment every 5 seconds
+        
+        fetch('/process_frame', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                image: dataURL,
+                timestamp: frame_count + 'sec',
+                store: true // Add this flag to indicate the frame should be stored
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            emotionText.textContent = data.emotion;
+            const emotionCounts = data.emotion_count;
             
-            intervalId = setInterval(() => {
-                const context = canvas.getContext('2d');
-                context.drawImage(video, 0, 0, 640, 480);
-                const dataURL = canvas.toDataURL('image/jpeg');
-                fetch('/process_frame', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ image: dataURL })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    emotionText.textContent = data.emotion;
-                    const emotionCounts = data.emotion_count;
-                    document.getElementById("neutralCount").textContent = emotionCounts.neutral;
-                    document.getElementById("happinessCount").textContent = emotionCounts.happiness;
-                    document.getElementById("surpriseCount").textContent = emotionCounts.surprise;
-                    document.getElementById("sadnessCount").textContent = emotionCounts.sadness;
-                    document.getElementById("angerCount").textContent = emotionCounts.anger;
-                    document.getElementById("disgustCount").textContent = emotionCounts.disgust;
-                    document.getElementById("fearCount").textContent = emotionCounts.fear;
-                })
-                .catch(error => console.error('Error processing the frame.', error));
-            }, 500);
-        }
+        })
+        .catch(error => console.error('Error processing the frame.', error));
+    }, 1000);  // Changed to 5000 milliseconds (5 seconds)
+}
+
 
         function stopVideo() {
             if (video.srcObject) {
@@ -176,6 +168,9 @@
             } else {
                 startVideo();
             }
+        });
+        document.getElementById('viewReportBtn').addEventListener('click', () => {
+            window.location.href = '/report';
         });
     </script>
 </body>
