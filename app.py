@@ -6,6 +6,9 @@ import os
 import base64
 import io
 from datetime import datetime
+from fpdf import FPDF
+from flask import send_from_directory
+from flask import make_response
 
 app = Flask(__name__)
 
@@ -23,6 +26,7 @@ print("Loaded model from disk")
 # Define emotion labels for mapping predictions
 emotion_labels = ['neutral', 'happiness', 'surprise', 'sadness', 'anger', 'disgust', 'fear']
 saved_frames = []
+captured_emotions = []
 
 emotion_count = {label: 0 for label in emotion_labels}
 
@@ -66,8 +70,22 @@ def process_frame():
     timestamp = str(datetime.now().time())  # Current time
     if data.get('store', False):  # Only store if the 'store' flag is true
         saved_frames.append({"timestamp": data['timestamp'], "image": encoded_image, "prediction": emotion})
+        captured_emotions.append({"timestamp": data['timestamp'], "emotion": emotion})  # Add this line
 
     return jsonify({"emotion": emotion, "emotion_count": emotion_count, "timestamp": timestamp})
+
+def generate_emotion_report():
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_font("Arial", size=12)
+    pdf.cell(200, 10, txt="Emotion Detection Report", ln=True, align='C')
+    for entry in captured_emotions:
+        pdf.ln(10)
+        pdf.cell(200, 10, txt="Timestamp: {} Emotion: {}".format(entry['timestamp'], entry['emotion']), ln=True, align='L')
+    pdf_name = "emotion_report.pdf"
+    pdf.output(pdf_name)
+    return pdf_name
+
 
 def gen():
     """Generate frame for video streaming."""
@@ -98,7 +116,11 @@ def report():
     saved_frames.clear()  # Clear the saved frames
     return render_template('report.html', frames=report_frames)
 
-
+@app.route('/get_emotion_report')
+def get_emotion_report():
+    pdf_name = generate_emotion_report()
+    captured_emotions.clear()   # clear the list after generating the report
+    return send_from_directory(os.getcwd(), pdf_name, as_attachment=True)
 
 if __name__ == '__main__':
     app.run(debug=True)
