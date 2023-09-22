@@ -9,3 +9,6 @@ pip install Flask keras opencv-python-headless tensorflow-cpu pandas numpy reque
 3) Web Application will open in localhost
 
 ## Live Deploy: https://mycnnapp-b97cda765ba7.herokuapp.com/
+
+## Note: 
+runtime.txt, requirements.txt and Procfile are for heroku deploy.
