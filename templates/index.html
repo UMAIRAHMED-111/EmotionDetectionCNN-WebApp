@@ -127,7 +127,7 @@
         context.drawImage(video, 0, 0, 640, 480);
         const dataURL = canvas.toDataURL('image/jpeg');
         
-        frame_count += 5; // Increment every 5 seconds
+        frame_count += 1; // Increment every 1 seconds
         
         fetch('/process_frame', {
             method: 'POST',
@@ -147,7 +147,7 @@
             
         })
         .catch(error => console.error('Error processing the frame.', error));
-    }, 500);  // Changed to 5000 milliseconds (5 seconds)
+    }, 1000);  // Changed to 5000 milliseconds (5 seconds)
 }
 
 
@@ -160,7 +160,27 @@
             isStreaming = false;
             clearInterval(intervalId);
             startStopBtn.innerText = "Start Video";
-        }
+            fetch('/get_emotion_report')
+    .then(response => response.blob())  // Convert response to blob data
+    .then(data => {
+        const blob = new Blob([data], { type: "application/pdf" });
+
+        if (window.navigator && window.navigator.msSaveOrOpenBlob) {
+            window.navigator.msSaveOrOpenBlob(blob);
+            return;
+        } 
+
+        const dataURL = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = dataURL;
+        link.target = '_blank';
+        link.click();
+
+        setTimeout(function () {
+            window.URL.revokeObjectURL(dataURL);
+        }, 100);
+    });
+}
 
         startStopBtn.addEventListener('click', () => {
             if(isStreaming) {
@@ -169,9 +189,11 @@
                 startVideo();
             }
         });
+        
         document.getElementById('viewReportBtn').addEventListener('click', () => {
-            window.location.href = '/report';
+           window.location.href = '/report';
         });
+
     </script>
 </body>
 </html>
