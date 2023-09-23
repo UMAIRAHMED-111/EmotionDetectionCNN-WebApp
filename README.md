@@ -1,7 +1,7 @@
 # EmotionDetectionCNN2
 
 ## Installs:
-pip install Flask keras opencv-python-headless tensorflow-cpu pandas numpy requests
+pip install Flask keras opencv-python-headless tensorflow-cpu pandas numpy requests fpdf
 
 ## Instructions:
 1) First install the modules using pip
