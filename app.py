@@ -75,11 +75,15 @@ def process_frame():
     return jsonify({"emotion": emotion, "emotion_count": emotion_count, "timestamp": timestamp})
 
 def generate_emotion_report():
+    global captured_emotions
+    copyEmotions = captured_emotions.copy()
+    captured_emotions.clear()
+
     pdf = FPDF()
     pdf.add_page()
     pdf.set_font("Arial", size=12)
     pdf.cell(200, 10, txt="Emotion Detection Report", ln=True, align='C')
-    for entry in captured_emotions:
+    for entry in copyEmotions:
         pdf.ln(10)
         pdf.cell(200, 10, txt="Timestamp: {} Emotion: {}".format(entry['timestamp'], entry['emotion']), ln=True, align='L')
     pdf_name = "emotion_report.pdf"
@@ -119,7 +123,6 @@ def report():
 @app.route('/get_emotion_report')
 def get_emotion_report():
     pdf_name = generate_emotion_report()
-    captured_emotions.clear()   # clear the list after generating the report
     return send_from_directory(os.getcwd(), pdf_name, as_attachment=True)
 
 if __name__ == '__main__':
