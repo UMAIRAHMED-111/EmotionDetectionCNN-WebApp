@@ -147,11 +147,12 @@
             
         })
         .catch(error => console.error('Error processing the frame.', error));
-    }, 1000);  // Changed to 5000 milliseconds (5 seconds)
+    }, 1000); 
 }
 
 
         function stopVideo() {
+            frame_count = 0;
             if (video.srcObject) {
                 const tracks = video.srcObject.getTracks();
                 tracks.forEach(track => track.stop());
