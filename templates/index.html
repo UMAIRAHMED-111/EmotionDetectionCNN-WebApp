@@ -101,7 +101,6 @@
         <button id="viewReportBtn">Generate Report</button>
         <p id="emotion">Emotion: <span></span></p>
     </div>
-
     <script>
         const video = document.getElementById('video');
         const canvas = document.getElementById('canvas');
@@ -152,7 +151,6 @@
 
 
         function stopVideo() {
-            frame_count = 0;
             if (video.srcObject) {
                 const tracks = video.srcObject.getTracks();
                 tracks.forEach(track => track.stop());
@@ -192,8 +190,28 @@
         });
         
         document.getElementById('viewReportBtn').addEventListener('click', () => {
-           window.location.href = '/report';
-        });
+    window.location.href = '/report';
+    fetch('/start_new_session', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log("New session started", data);
+    });
+    fetch('/clear_data', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log("Data cleared", data);
+    });
+});
 
     </script>
 </body>
