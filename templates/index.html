@@ -6,6 +6,14 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Emotion Detection</title>
+    <script>
+        window.addEventListener('pageshow', function (event) {
+          if (event.persisted || (typeof window.performance != "undefined" && window.performance.navigation.type === 2)) {
+            // Page is loading from history cache, force a reload of the page.
+            window.location.reload();
+          }
+        });
+    </script>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -189,28 +197,8 @@
             }
         });
         
-        document.getElementById('viewReportBtn').addEventListener('click', () => {
+    document.getElementById('viewReportBtn').addEventListener('click', () => {
     window.location.href = '/report';
-    fetch('/start_new_session', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-    })
-    .then(response => response.json())
-    .then(data => {
-        console.log("New session started", data);
-    });
-    fetch('/clear_data', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-    })
-    .then(response => response.json())
-    .then(data => {
-        console.log("Data cleared", data);
-    });
 });
 
     </script>
