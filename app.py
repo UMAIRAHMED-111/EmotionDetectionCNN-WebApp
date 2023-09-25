@@ -26,7 +26,6 @@ print("Loaded model from disk")
 # Define emotion labels for mapping predictions
 emotion_labels = ['neutral', 'happiness', 'surprise', 'sadness', 'anger', 'disgust', 'fear']
 saved_frames = []
-captured_emotions = []
 
 emotion_count = {label: 0 for label in emotion_labels}
 
@@ -70,22 +69,18 @@ def process_frame():
     timestamp = str(datetime.now().time())  # Current time
     if data.get('store', False):  # Only store if the 'store' flag is true
         saved_frames.append({"timestamp": data['timestamp'], "image": encoded_image, "prediction": emotion})
-        captured_emotions.append({"timestamp": data['timestamp'], "emotion": emotion})  # Add this line
 
     return jsonify({"emotion": emotion, "emotion_count": emotion_count, "timestamp": timestamp})
 
 def generate_emotion_report():
-    global captured_emotions
-    copyEmotions = captured_emotions.copy()
-    captured_emotions.clear()
 
     pdf = FPDF()
     pdf.add_page()
     pdf.set_font("Arial", size=12)
     pdf.cell(200, 10, txt="Emotion Detection Report", ln=True, align='C')
-    for entry in copyEmotions:
+    for entry in saved_frames:
         pdf.ln(10)
-        pdf.cell(200, 10, txt="Timestamp: {} Emotion: {}".format(entry['timestamp'], entry['emotion']), ln=True, align='L')
+        pdf.cell(200, 10, txt="Timestamp: {} Emotion: {}".format(entry['timestamp'], entry['prediction']), ln=True, align='L')
     pdf_name = "emotion_report.pdf"
     pdf.output(pdf_name)
     return pdf_name
@@ -115,15 +110,26 @@ def video_feed():
 
 @app.route('/report')
 def report():
-    global saved_frames
-    report_frames = saved_frames.copy()  # Temporary store the frames for the report
-    saved_frames.clear()  # Clear the saved frames
-    return render_template('report.html', frames=report_frames)
+    return render_template('report.html', frames=saved_frames)
 
 @app.route('/get_emotion_report')
 def get_emotion_report():
     pdf_name = generate_emotion_report()
     return send_from_directory(os.getcwd(), pdf_name, as_attachment=True)
 
+@app.route('/clear_data', methods=['POST'])
+def clear_data():
+    global saved_frames
+    saved_frames.clear()
+    return jsonify({"status": "Data cleared"})
+
+@app.route('/start_new_session', methods=['POST'])
+def start_new_session():
+    global saved_frames, emotion_count
+    saved_frames.clear()
+    emotion_count = {label: 0 for label in emotion_labels}
+    return jsonify({"status": "New session started"})
+
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=False)
