@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Report</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            text-align: center;
+            margin: 0;
+            background-image: url('https://img.freepik.com/free-vector/network-connections-plexus-banner-design-with-connecting-lines-dots_1048-19529.jpg?w=996&t=st=1707202722~exp=1707203322~hmac=d75c9b79c419f229abd4a5d3714fb6fdbd6a9a619b9b0277dcf44bb8681ab1ef');
+            background-size: cover; /* Make the background image cover the entire page */
+            background-repeat: no-repeat; /* Prevent the background image from repeating */
+            background-attachment: fixed; /* Optional: Fix the background image in place */
+            color: #020202;
+            position: relative; /* Required for the pseudo-element */
+        }
+
+        body::before {
+            content: "";
+            background-color: rgba(0, 0, 0, 0.5); /* Adjust the opacity (0.5 for semi-transparent) and color */
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 110%;
+            z-index: -1; /* Place the overlay behind the content */
+        }
+
+        header {
+            background-color: #242230;
+            color: #fff;
+            padding: 0.2rem;
+            text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.2);
+            margin-bottom: 5vw;
+        }
+
+        .frame-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* Creates a responsive grid */
+            gap: 20px; /* Space between grid items */
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .frame {
+            background-color: #ecf0f1;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        img {
+            max-width: 100%;
+            border-radius: 8px;
+        }
+
+        p {
+            margin: 10px 0;
+        }
+
+        .timeline {
+  position: relative;
+  width: 60%;
+  height: 2px;
+  background-color: #ccc;
+  margin: auto;
+  margin-bottom: 40px;
+}
+
+.point {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: white;
+  top: -4px;
+}
+
+.start {
+  left: 0;
+  color: white;
+}
+
+.middle {
+  left: 50%;
+  transform: translateX(-50%);
+  color: white;
+}
+
+.end {
+  right: 0;
+  color: white;
+}
+
+p{
+    padding-top: 5px;
+}
+
+.heading{
+    color: rgb(248, 72, 72);
+}
+
+.text {
+    color: rgb(33, 208, 33);
+    animation: flash 1s infinite alternate; /* Flashing animation */
+}
+
+@keyframes flash {
+    0% {
+        opacity: 1; /* Fully visible */
+    }
+    100% {
+        opacity: 0; /* Fully transparent */
+    }
+}
+
+.button1 {
+  background-color: white;
+  border: 2px solid #4CAF50; /* Green border */
+  color: #4CAF50; /* Green text */
+  margin: 10px;
+  padding: 10px 20px; /* Padding around text */
+  text-align: center; /* Center-align text */
+  text-decoration: none; /* Remove underline */
+  display: inline-block; /* Make it inline */
+  font-size: 16px; /* Font size */
+  cursor: pointer; /* Cursor style on hover */
+  border-radius: 4px; /* Rounded corners */
+  transition-duration: 0.4s; /* Smooth transition on hover */
+}
+
+.button1:hover {
+  background-color: #4CAF50; /* Green background on hover */
+  color: white; /* White text on hover */
+}
+
+    </style>
+
+</head>
+
+<body>
+    <header>
+        <h1>Emotion Detection - Session History</h1>
+    </header>
+    <div class="timeline">
+        <div class="point start"><p>Start</p></div>
+        <div class="point middle"><p>Middle</p></div>
+        <div class="point end"><p>End</p></div>
+    </div>
+    <div class="frame-container">
+        {% for frame in frames %}
+        {% if loop.first or loop.index == ((frames|length + 1) / 2)|round or loop.last %}
+        <div class="frame">
+            <h2>Emotion:</h2>
+            <h1>
+                {% if frame.prediction in ['happiness', 'surprise'] %}
+                Satisfied
+                {% elif frame.prediction in ['sadness', 'anger', 'disgust', 'fear'] %}
+                Unsatisfied
+                {% else %}
+                Neutral
+                {% endif %}
+            </h1>
+        </div>
+        {% endif %}
+        {% endfor %}
+    </div>
+
+    <!-- Button to download snapshot -->
+    <button class="button1" onclick="downloadSnapshot()">Download Snapshot</button>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script>
+        window.addEventListener("load", function () {
+            fetch('/clear_data', {
+                    method: 'POST'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === "Data cleared") {
+                        console.log("Data cleared successfully");
+                    }
+                });
+
+                // Get all the displayed emotions
+            var emotions = document.querySelectorAll('.frame h1');
+            
+            // Create an object to store the count of each emotion
+            var emotionCount = {};
+            
+            // Iterate through each emotion and count occurrences
+            emotions.forEach(function (emotion) {
+                var emotionText = emotion.innerText.trim();
+                emotionCount[emotionText] = (emotionCount[emotionText] || 0) + 1;
+            });
+            
+            // Find the most common emotion
+            var mostCommonEmotion = Object.keys(emotionCount).reduce(function(a, b){ return emotionCount[a] > emotionCount[b] ? a : b });
+            
+            // Display the most common emotion
+            var mostCommonEmotionElement = document.createElement('div');
+            mostCommonEmotionElement.innerHTML = '<h2 class="heading">Most Common Emotion:</h2><h1 class="text">' + mostCommonEmotion + '</h1>';
+            document.body.appendChild(mostCommonEmotionElement);
+        });
+
+        function downloadSnapshot() {
+            console.log('Downloading snapshot...');
+            // Capture the body element and convert it to canvas using html2canvas
+            html2canvas(document.body).then(function (canvas) {
+                // Convert canvas to image data
+                var imageData = canvas.toDataURL('image/png');
+
+                // Create a temporary anchor element to trigger the download
+                var link = document.createElement('a');
+                link.download = 'snapshot.png'; // Change the file name if needed
+                link.href = imageData;
+                link.click();
+
+                // Clean up
+                link.remove();
+            });
+        }
+
+        
+
+    </script>
+</body>
+
+</html>

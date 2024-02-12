@@ -1,0 +1,9 @@
+﻿Flask==2.3.3
+keras==2.13.1
+opencv-python-headless==4.8.0.76
+tensorflow-cpu==2.13.0
+pandas==2.0.1
+numpy==1.24.3
+gunicorn
+fpdf
+requests==2.25.1
