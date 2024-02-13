@@ -106,7 +106,7 @@ p{
 
 .text {
     color: rgb(33, 208, 33);
-    animation: flash 1s infinite alternate; /* Flashing animation */
+    
 }
 
 @keyframes flash {
@@ -170,8 +170,6 @@ p{
         {% endfor %}
     </div>
 
-    <!-- Button to download snapshot -->
-    <button class="button1" onclick="downloadSnapshot()">Download Snapshot</button>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script>
         window.addEventListener("load", function () {
@@ -204,6 +202,9 @@ p{
             var mostCommonEmotionElement = document.createElement('div');
             mostCommonEmotionElement.innerHTML = '<h2 class="heading">Most Common Emotion:</h2><h1 class="text">' + mostCommonEmotion + '</h1>';
             document.body.appendChild(mostCommonEmotionElement);
+
+            // Call downloadSnapshot function after all data manipulation tasks
+            setTimeout(downloadSnapshot, 2000);
         });
 
         function downloadSnapshot() {
@@ -223,6 +224,7 @@ p{
                 link.remove();
             });
         }
+            
 
         
 
