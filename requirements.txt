@@ -8,5 +8,5 @@ gunicorn
 fpdf
 requests==2.25.1
 opencv-python==4.8.0.76
-xwlsxwriter
+xlsxwriter
 matplotlib
