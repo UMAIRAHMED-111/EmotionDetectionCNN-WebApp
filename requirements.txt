@@ -1,4 +1,4 @@
-﻿Flask==2.3.3
+Flask==2.3.3
 keras==2.13.1
 opencv-python-headless==4.8.0.76
 tensorflow-cpu==2.13.0
@@ -8,6 +8,5 @@ gunicorn
 fpdf
 requests==2.25.1
 opencv-python==4.8.0.76
-sqlite3
 xwlsxwriter
 matplotlib
